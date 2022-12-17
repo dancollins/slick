@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 let filepathEl;
-let scene, renderer, camera;
+let scene, renderer, camera, controls;
 let mesh;
 
 
@@ -13,10 +13,12 @@ function animate() {
 
   const time = Date.now() * 0.001;
 
-  if (mesh) {
-    mesh.rotation.x = time * 0.25;
-    mesh.rotation.y = time * 0.5;
-  }
+  // if (mesh) {
+  //   mesh.rotation.x = time * 0.25;
+  //   mesh.rotation.y = time * 0.5;
+  // }
+
+  controls.update();
 
   renderer.render(scene, camera);
 }
@@ -45,6 +47,7 @@ function load_mesh(mesh_data) {
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
   geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
   geometry.setAttribute('color', new THREE.Float32BufferAttribute(colours, 3));
+  geometry.computeBoundingBox();
 
   const material = new THREE.MeshPhongMaterial({
     side: THREE.DoubleSide,
@@ -52,6 +55,13 @@ function load_mesh(mesh_data) {
   });
 
   mesh = new THREE.Mesh(geometry, material);
+
+  // Our verticies are all world-relative, and we want to ensure there's at least one point intersecting (0,0,0)
+  let point = mesh_data.vertices[0];
+  mesh.translateX(-point.x);
+  mesh.translateY(-point.y);
+  mesh.translateZ(-point.z);
+
   scene.add(mesh);
   console.log("Mesh added to scene!");
 }
@@ -69,24 +79,27 @@ window.addEventListener("DOMContentLoaded", () => {
     .addEventListener("click", () => slice());
 
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 1, 3500);
-  camera.position.z = 64;
+  scene.background = new THREE.Color(0xbfe3dd);
+
+  camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 2000);
+  camera.position.set(5, 2, 8);
+
   renderer = new THREE.WebGLRenderer();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(window.innerWidth - 100, window.innerHeight - 100);
   document.querySelector("#container").appendChild(renderer.domElement);
 
-  const controls = new OrbitControls(camera, renderer.domElement);
-
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x050505);
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.target.set(0, 0.5, 0);
+  controls.update();
+  controls.enableDamping = true;
 
   const light = new THREE.HemisphereLight();
   scene.add(light);
 
-  // const geometry = new THREE.BoxGeometry(1, 1, 1);
-  // const material = new THREE.MeshNormalMaterial({ color: 0x00ff00 });
-  // const cube = new THREE.Mesh(geometry, material);
-  // scene.add(cube);
+  const helper = new THREE.GridHelper(100, 100);
+  helper.material.opacity = 0.25;
+  helper.material.transparent = true;
+  scene.add(helper);
 
   animate();
 });
