@@ -19,6 +19,9 @@ serde = { version = "1.0", features = ["derive"] }
 tauri = {version = "1.2", features = ["shell-open"] }
 stl_io = "0.7.0"
 log = "0.4.17"
+three-d-asset = "0.4.0"
+tri-mesh = "0.6.0"
+cgmath = { version = "0.18.0", features = ["serde"] }
 
 [features]
 # by default Tauri runs in production mode

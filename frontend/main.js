@@ -24,23 +24,38 @@ function animate() {
 }
 
 
-function load_mesh(mesh_data) {
+function load_mesh(data) {
   console.log("Loading mesh from data...");
-  const vertices = []
-  for (let i = 0; i < mesh_data.vertices.length; i++) {
-    let v = mesh_data.vertices[i];
+  console.log(data);
+
+  let mesh_data = data.mesh;
+
+  const vertices = [];
+  const indicies = mesh_data.indices.U32;
+  const normals = [];
+  const colours = [];
+
+  let point = mesh_data.positions.F32[0];
+  for (let i = 0; i < mesh_data.positions.F32.length; i++) {
+    let v = mesh_data.positions.F32[i];
     vertices.push(v.x, v.y, v.z);
   }
 
-  const indicies = []
-  const normals = []
-  const colours = []
-  for (let i = 0; i < mesh_data.triangles.length; i++) {
-    let t = mesh_data.triangles[i];
-    indicies.push(t.indicies[0], t.indicies[1], t.indicies[2])
-    normals.push(t.normal.x, t.normal.y, t.normal.z)
+  for (let i = 0; i < mesh_data.normals.length; i++) {
+    let v = mesh_data.normals[i];
+    normals.push(v.x, v.y, v.z);
+  }
+
+  for (let i = 0; i < mesh_data.positions.F32.length; i++) {
     colours.push(1, 0.2, 0.2)
   }
+
+  // for (let i = 0; i < mesh_data.triangles.length; i++) {
+  //   let t = mesh_data.triangles[i];
+  //   indicies.push(t.indicies[0], t.indicies[1], t.indicies[2])
+  //   normals.push(t.normal.x, t.normal.y, t.normal.z)
+  //   colours.push(1, 0.2, 0.2)
+  // }
 
   const geometry = new THREE.BufferGeometry();
   geometry.setIndex(indicies);
@@ -57,7 +72,6 @@ function load_mesh(mesh_data) {
   mesh = new THREE.Mesh(geometry, material);
 
   // Our verticies are all world-relative, and we want to ensure there's at least one point intersecting (0,0,0)
-  let point = mesh_data.vertices[0];
   mesh.translateX(-point.x);
   mesh.translateY(-point.y);
   mesh.translateZ(-point.z);

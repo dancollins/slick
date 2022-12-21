@@ -9,7 +9,7 @@ mod mesh;
 
 #[tauri::command]
 fn load_file(path: &str) -> mesh::Mesh {
-    mesh::load(Path::new(path))
+    mesh::load(Path::new(path)).unwrap()
 }
 
 fn main() {
